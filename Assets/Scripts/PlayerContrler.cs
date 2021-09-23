@@ -19,7 +19,11 @@ public class PlayerContrler : MonoBehaviour
     public bool isCrouch;
     public bool isGround;
     public bool isJump;
+    public bool isHeadBlocked;
     [Header("环境监测")]
+    public float footOffset;
+    public float headClearance=0.5f;
+    public float groundDistance = 0.2f;
     float xVelocity;
     public LayerMask groundLayer;
 
@@ -31,6 +35,7 @@ public class PlayerContrler : MonoBehaviour
     Vector2 colliderStandOffset;
     Vector2 colliderCrouchSize;
     Vector2 colliderCrouchOffset;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +45,8 @@ public class PlayerContrler : MonoBehaviour
         colliderStandOffset = coll.offset;
         colliderCrouchSize = new Vector2(coll.size.x, coll.size.y / 2f);
         colliderCrouchOffset = new Vector2(coll.offset.x,coll.offset.y/2f);
+
+        footOffset = coll.size.x / 2;
     }
 
     // Update is called once per frame
@@ -57,21 +64,28 @@ public class PlayerContrler : MonoBehaviour
     }
     void PhysicsCheck()
     {
-        if (coll.IsTouchingLayers(groundLayer))
-        {
+        RaycastHit2D leftCheck = Raycast(new Vector2(-footOffset,0f),Vector2.down,groundDistance,groundLayer);
+        RaycastHit2D rightCheck = Raycast(new Vector2(footOffset, 0f), Vector2.down, groundDistance, groundLayer);
+
+
+        if (leftCheck|| rightCheck)
             isGround = true;
-        }
         else
-        {
             isGround = false;
-        }
+
+
+        RaycastHit2D headCheck = Raycast(new Vector2(0f, coll.size.y), Vector2.up, headClearance, groundLayer);
+        if (headCheck)
+            isHeadBlocked = true;
+        else
+            isHeadBlocked = false;
     }
     void BasicMovement() {
         if (crouchHeld&&!isCrouch&&isGround)
         {
             Crouch();
         }
-        else if (!crouchHeld && isCrouch)
+        else if (!crouchHeld && isCrouch&&!isHeadBlocked)
         {
             StandUp();
         }
@@ -130,5 +144,14 @@ public class PlayerContrler : MonoBehaviour
         isCrouch = false;
         coll.size = colliderStandSize;
         coll.offset = colliderStandOffset;
+    }
+    //射线判断接触
+    RaycastHit2D Raycast(Vector2 offset, Vector2 rayDistance, float length, LayerMask layer)
+    {
+        Vector2 pos = transform.position;
+        RaycastHit2D hit = Physics2D.Raycast(pos + offset, rayDistance, length, layer);
+        Color color = hit ? Color.red : Color.green;
+        Debug.DrawRay(pos+offset,rayDistance*length);
+        return hit;
     }
 }
