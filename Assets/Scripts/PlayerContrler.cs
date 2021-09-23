@@ -15,17 +15,24 @@ public class PlayerContrler : MonoBehaviour
     public float jumpHoldDuration = 0.1f;
     public float CrouchJumpBoost = 2.5f;
     float jumpTime;
+    public float hangingJumpForce = 15f;
     [Header("状态")]
     public bool isCrouch;
     public bool isGround;
     public bool isJump;
     public bool isHeadBlocked;
+    public bool isHanging;
     [Header("环境监测")]
     public float footOffset;
     public float headClearance=0.5f;
     public float groundDistance = 0.2f;
     float xVelocity;
     public LayerMask groundLayer;
+    [Header("悬挂检测")]
+    float playerHeight;
+    public float eyeHeight=1.5f;
+    public float grabDistance=0.4f;
+    public float reachOffset = 0.7f;
 
     public bool jumpPressed;
     public bool jumpHeld;
@@ -45,7 +52,7 @@ public class PlayerContrler : MonoBehaviour
         colliderStandOffset = coll.offset;
         colliderCrouchSize = new Vector2(coll.size.x, coll.size.y / 2f);
         colliderCrouchOffset = new Vector2(coll.offset.x,coll.offset.y/2f);
-
+        playerHeight= coll.size.y;
         footOffset = coll.size.x / 2;
     }
 
@@ -64,23 +71,40 @@ public class PlayerContrler : MonoBehaviour
     }
     void PhysicsCheck()
     {
+        //脚部检测射线
         RaycastHit2D leftCheck = Raycast(new Vector2(-footOffset,0f),Vector2.down,groundDistance,groundLayer);
         RaycastHit2D rightCheck = Raycast(new Vector2(footOffset, 0f), Vector2.down, groundDistance, groundLayer);
-
-
         if (leftCheck|| rightCheck)
             isGround = true;
         else
             isGround = false;
 
-
+        //头部检测射线
         RaycastHit2D headCheck = Raycast(new Vector2(0f, coll.size.y), Vector2.up, headClearance, groundLayer);
         if (headCheck)
             isHeadBlocked = true;
         else
             isHeadBlocked = false;
+        //悬挂射线
+        float direction = transform.localScale.x;
+        Vector2 graDir = new Vector2(direction,0f);
+        RaycastHit2D blockedCheck = Raycast(new Vector2(footOffset*direction, playerHeight), graDir, grabDistance, groundLayer);
+        RaycastHit2D wallCheck = Raycast(new Vector2(footOffset * direction, eyeHeight), graDir, grabDistance, groundLayer);
+        RaycastHit2D ledgeCheck = Raycast(new Vector2(reachOffset * direction, playerHeight), Vector2.down, grabDistance, groundLayer);
+        if (!isGround&&rb.velocity.y<0f&&ledgeCheck&&wallCheck&&!blockedCheck)
+        {
+            Vector3 pos = transform.position;
+            pos.x += wallCheck.distance-0.05f * direction;
+            pos.y -= ledgeCheck.distance;
+            transform.position = pos;
+            rb.bodyType = RigidbodyType2D.Static;
+            isHanging = true;
+        }
     }
     void BasicMovement() {
+        if (isHanging)
+            return;
+
         if (crouchHeld&&!isCrouch&&isGround)
         {
             Crouch();
@@ -107,7 +131,22 @@ public class PlayerContrler : MonoBehaviour
     }
     void Jump()
     {
-        if (jumpPressed&&isGround&&!isJump)
+        if (isHanging)
+        {
+            if (jumpPressed)
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                rb.velocity = new Vector2(rb.velocity.x, hangingJumpForce);
+                isHanging = false;
+            }
+            if (Input.GetButtonDown("Crouch"))
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                //rb.velocity = new Vector2(rb.velocity.x, hangingJumpForce);
+                isHanging = false;
+            }
+        }
+        if (jumpPressed&&isGround&&!isJump && !isHeadBlocked)
         {
             if (isCrouch&&isGround)
             {
