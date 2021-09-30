@@ -17,16 +17,16 @@ public class PlayerContrler : MonoBehaviour
     float jumpTime;
     public float hangingJumpForce = 15f;
     [Header("状态")]
-    public bool isCrouch;
-    public bool isGround;
-    public bool isJump;
+    public bool isCrouching;
+    public bool isOnGround;
+    public bool isJumping;
     public bool isHeadBlocked;
     public bool isHanging;
     [Header("环境监测")]
     public float footOffset;
     public float headClearance=0.5f;
     public float groundDistance = 0.2f;
-    float xVelocity;
+    public float xVelocity;
     public LayerMask groundLayer;
     [Header("悬挂检测")]
     float playerHeight;
@@ -75,9 +75,9 @@ public class PlayerContrler : MonoBehaviour
         RaycastHit2D leftCheck = Raycast(new Vector2(-footOffset,0f),Vector2.down,groundDistance,groundLayer);
         RaycastHit2D rightCheck = Raycast(new Vector2(footOffset, 0f), Vector2.down, groundDistance, groundLayer);
         if (leftCheck|| rightCheck)
-            isGround = true;
+            isOnGround = true;
         else
-            isGround = false;
+            isOnGround = false;
 
         //头部检测射线
         RaycastHit2D headCheck = Raycast(new Vector2(0f, coll.size.y), Vector2.up, headClearance, groundLayer);
@@ -91,7 +91,7 @@ public class PlayerContrler : MonoBehaviour
         RaycastHit2D blockedCheck = Raycast(new Vector2(footOffset*direction, playerHeight), graDir, grabDistance, groundLayer);
         RaycastHit2D wallCheck = Raycast(new Vector2(footOffset * direction, eyeHeight), graDir, grabDistance, groundLayer);
         RaycastHit2D ledgeCheck = Raycast(new Vector2(reachOffset * direction, playerHeight), Vector2.down, grabDistance, groundLayer);
-        if (!isGround&&rb.velocity.y<0f&&ledgeCheck&&wallCheck&&!blockedCheck)
+        if (!isOnGround&&rb.velocity.y<0f&&ledgeCheck&&wallCheck&&!blockedCheck)
         {
             Vector3 pos = transform.position;
             pos.x += wallCheck.distance-0.05f * direction;
@@ -105,29 +105,29 @@ public class PlayerContrler : MonoBehaviour
         if (isHanging)
             return;
 
-        if (crouchHeld&&!isCrouch&&isGround)
+        if (crouchHeld&&!isCrouching&&isOnGround)
         {
             Crouch();
         }
-        else if (!crouchHeld && isCrouch&&!isHeadBlocked)
+        else if (!crouchHeld && isCrouching&&!isHeadBlocked)
         {
             StandUp();
         }
-        else if (!isGround&&isCrouch)
+        else if (!isOnGround&&isCrouching)
         {
             StandUp();
 
         }
-        if (isCrouch)
+        if (isCrouching)
         {
             xVelocity /= CrouchSpeedDivisor;
         }
         xVelocity = Input.GetAxis("Horizontal");
         rb.velocity = new Vector2(xVelocity * speed, rb.velocity.y);
         if (xVelocity<0)       
-            transform.localScale = new Vector2(-1, 1);       
+            transform.localScale = new Vector3(-1, 1,1);       
         if (xVelocity>0)       
-            transform.localScale = new Vector2(1, 1);      
+            transform.localScale = new Vector3(1, 1,1);      
     }
     void Jump()
     {
@@ -146,20 +146,22 @@ public class PlayerContrler : MonoBehaviour
                 isHanging = false;
             }
         }
-        if (jumpPressed&&isGround&&!isJump && !isHeadBlocked)
+        if (jumpPressed&&isOnGround&&!isJumping && !isHeadBlocked)
         {
-            if (isCrouch&&isGround)
+            if (isCrouching&&isOnGround)
             {
                 StandUp();
                 rb.AddForce(new Vector2(0f, CrouchJumpBoost), ForceMode2D.Impulse);
             }
-            isGround = false;
-            isJump = true;
+            isOnGround = false;
+            isJumping = true;
             jumpTime = Time.time + jumpHoldDuration;
             //突然给力
             rb.AddForce(new Vector2(0f,jumpForce),ForceMode2D.Impulse);
+
+            AudioManager.PlayJumpAudio();
         }
-        else if (isJump)
+        else if (isJumping)
         {
             if (jumpHeld)
             {
@@ -167,20 +169,20 @@ public class PlayerContrler : MonoBehaviour
             }
             if (jumpTime<Time.time)
             {
-                isJump = false;
+                isJumping = false;
             }
         }
 
     }
     void Crouch()
     {
-        isCrouch = true;
+        isCrouching = true;
         coll.size = colliderCrouchSize;
         coll.offset = colliderCrouchOffset;
         
     }
     void StandUp() { 
-        isCrouch = false;
+        isCrouching = false;
         coll.size = colliderStandSize;
         coll.offset = colliderStandOffset;
     }
