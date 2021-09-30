@@ -5,8 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public GameObject deathVFXPrafab;
+    public GameObject deathVFXPrefab;
+    public GameObject deathShadowPrefab;
     int trapsLayer;
+    bool isDeath;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,10 +22,12 @@ public class PlayerHealth : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer==trapsLayer)
+        if (collision.gameObject.layer==trapsLayer&&!isDeath)
         {
+            isDeath = true;
             //播放粒子效果
-            Instantiate(deathVFXPrafab, transform.position, transform.rotation);
+            Instantiate(deathVFXPrefab, transform.position, transform.rotation);
+            Instantiate(deathShadowPrefab, transform.position, Quaternion.Euler(0,0,Random.Range(-45,90)));
             gameObject.SetActive(false);
             AudioManager.PlayDeathAudio();
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

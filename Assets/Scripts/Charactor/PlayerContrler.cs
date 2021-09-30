@@ -59,6 +59,11 @@ public class PlayerContrler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GameManager.GameIsOver())
+        {
+            return;
+        }
+
         jumpPressed = Input.GetButtonDown("Jump");
         jumpHeld = Input.GetButton("Jump");
         crouchHeld = Input.GetButton("Crouch");
@@ -195,4 +200,5 @@ public class PlayerContrler : MonoBehaviour
         Debug.DrawRay(pos+offset,rayDistance*length);
         return hit;
     }
+
 }

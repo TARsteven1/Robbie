@@ -9,9 +9,12 @@ public class AudioManager : MonoBehaviour
     [Header("环境音")]
     public AudioClip ambientClip;
     public AudioClip musicClip;
-    [Header("死亡音效")]
+    [Header("FX音效")]
     public AudioClip deathFXClip;
     public AudioClip orbClip;
+    public AudioClip doorFXClip;
+    public AudioClip startLevelFXClip;
+    public AudioClip winClip;
     [Header("主角音效")]
     public AudioClip[] walkStepClips;
     public AudioClip[] crouchStepClips;
@@ -27,6 +30,8 @@ public class AudioManager : MonoBehaviour
     AudioSource playerSource;
     AudioSource voiceSource;
 
+    public AudioMixerGroup ambientGroup, musicGroup, FXGroup, playerGroup, voiceGroup;
+
     private void Awake()
     {
         if (current!=null)
@@ -41,6 +46,12 @@ public class AudioManager : MonoBehaviour
         fxSource = gameObject.AddComponent<AudioSource>();
         playerSource = gameObject.AddComponent<AudioSource>();
         voiceSource = gameObject.AddComponent<AudioSource>();
+
+        ambientSource.outputAudioMixerGroup = ambientGroup;
+        musicSource.outputAudioMixerGroup = musicGroup;
+        fxSource.outputAudioMixerGroup = FXGroup;
+        playerSource.outputAudioMixerGroup = playerGroup;
+        voiceSource.outputAudioMixerGroup = voiceGroup;
         PlayBGAudio();
     }
 
@@ -54,6 +65,15 @@ public class AudioManager : MonoBehaviour
         current.musicSource.clip = current.musicClip;
         current.musicSource.loop = true;
         current.musicSource.Play();
+
+        current.fxSource.clip = current.startLevelFXClip;
+        current.fxSource.Play();
+    }
+    public static void PlayerWonAudio()
+    {
+        current.fxSource.clip = current.winClip;
+        current.fxSource.Play();
+        current.playerSource.Stop();
     }
     public static void PlayFootstepAudio()
     {
@@ -96,5 +116,10 @@ public class AudioManager : MonoBehaviour
 
         current.fxSource.clip = current.orbClip;
         current.fxSource.Play();
+    }
+    public static void PlayDoorOpenAudio()
+    {
+        current.fxSource.clip = current.doorFXClip;
+        current.fxSource.PlayDelayed(1f);
     }
 }

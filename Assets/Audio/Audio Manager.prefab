@@ -47,6 +47,9 @@ MonoBehaviour:
   musicClip: {fileID: 8300000, guid: 0e5e5220b21cbb24cb45445289715171, type: 3}
   deathFXClip: {fileID: 8300000, guid: 60b51a24836264977999d094348513a3, type: 3}
   orbClip: {fileID: 8300000, guid: adcdcf962ffee4c3ea97ae70bb6301e4, type: 3}
+  doorFXClip: {fileID: 8300000, guid: 31d197fb35743494fbc89553f65d021f, type: 3}
+  startLevelFXClip: {fileID: 8300000, guid: da5a2d5f64bba4bed8b111bc90321579, type: 3}
+  winClip: {fileID: 8300000, guid: 8fb46ffce8c8a474d8ccfa66129389d3, type: 3}
   walkStepClips:
   - {fileID: 8300000, guid: 781ab33301f7d9842867a2970b9f8029, type: 3}
   - {fileID: 8300000, guid: 16a943bd4c9b2014e887102abc527138, type: 3}
@@ -62,3 +65,12 @@ MonoBehaviour:
   deathClip: {fileID: 8300000, guid: 4e3f9922651f9428e8b99445e42653dc, type: 3}
   deathVoiceClip: {fileID: 8300000, guid: bfe755c2baac648aaa89f65b7534298f, type: 3}
   orbVoiceClip: {fileID: 8300000, guid: df9a2ecbae44a4f30acf4617630a8ca9, type: 3}
+  ambientGroup: {fileID: 243375458998414286, guid: 1a97e82b85c8b7445be8d31fb13bed3a,
+    type: 2}
+  musicGroup: {fileID: 243230206115637112, guid: 1a97e82b85c8b7445be8d31fb13bed3a,
+    type: 2}
+  FXGroup: {fileID: 243408326399804062, guid: 1a97e82b85c8b7445be8d31fb13bed3a, type: 2}
+  playerGroup: {fileID: 243956182141439812, guid: 1a97e82b85c8b7445be8d31fb13bed3a,
+    type: 2}
+  voiceGroup: {fileID: 243908835443367434, guid: 1a97e82b85c8b7445be8d31fb13bed3a,
+    type: 2}
