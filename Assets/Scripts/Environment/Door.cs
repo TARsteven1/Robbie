@@ -11,7 +11,8 @@ public class Door : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         openID = Animator.StringToHash("Open");
-        GameManager.RegisterDoor(this);
+       // GameManager.RegisterDoor(this);
+        GameManager.Register<Door>(this);
     }
     public void Open()
     {

@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    SceneFade SceneFade;
+    SceneFade sceneFade;
    public  List<Orb> orbs;
     public int deathCount;
     Door lockedDoor;
@@ -24,13 +24,39 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(this);
     }
-    public static void RegisterDoor(Door door)
+    public static void Register<T>(T t)
+    {
+        switch (t.GetType().ToString())
+        {
+            case "Door":
+                Instance.lockedDoor = t as Door;
+                break;
+            case "SceneFade":
+                Instance.sceneFade = t as SceneFade;
+                break;
+            case "Orb":
+                if (!Instance.orbs.Contains(t as Orb))
+                {
+                    Instance.orbs.Add(t as Orb);
+                }
+                if (Instance.orbs.Count == 0)
+                {
+                    Instance.lockedDoor.Open();
+                }
+                UIManager.UpdateOrbUI(Instance.orbs.Count);
+                break;
+            default:
+                break;
+        }
+    }
+   
+    /*public static void RegisterDoor(Door door)
     {
         Instance.lockedDoor = door;
     }
     public static void RegisterSceneFader(SceneFade obj)
     {
-        Instance.SceneFade = obj;
+        Instance.sceneFade = obj;
     }
     public static void RegisterOrb(Orb orb)
     {
@@ -43,7 +69,7 @@ public class GameManager : MonoBehaviour
             Instance.lockedDoor.Open();
         }
         UIManager.UpdateOrbUI(Instance.orbs.Count);
-    }
+    }*/
     public static void PlayerGrabbedOrb(Orb orb)
     {
         if (Instance.orbs.Count==0)
@@ -55,7 +81,7 @@ public class GameManager : MonoBehaviour
     }
     public static void PlayerDied()
     {
-        Instance.SceneFade.FadeOut();
+        Instance.sceneFade.FadeOut();
         //Instance.deathCount++;
         Instance.deathCount++;
         UIManager.UpdateDeathUI(Instance.deathCount);

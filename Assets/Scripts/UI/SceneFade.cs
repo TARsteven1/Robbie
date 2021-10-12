@@ -11,7 +11,8 @@ public class SceneFade : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         fadeID = Animator.StringToHash("Fade");
-        GameManager.RegisterSceneFader(this);
+       // GameManager.RegisterSceneFader(this);
+        GameManager.Register<SceneFade>(this);
 
     }
 
